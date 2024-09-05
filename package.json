@@ -10,8 +10,12 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-navigation/stack": "^6.4.1",
+    "@voximplant/react-native-foreground-service": "^3.0.2",
     "react": "18.3.1",
-    "react-native": "0.75.2"
+    "react-native": "0.75.2",
+    "react-native-geolocation-service": "^5.3.1",
+    "react-native-maps": "^1.18.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
