@@ -14,15 +14,18 @@ import {SendDirectSms} from 'react-native-send-direct-sms';
 
 const App = () => {
   const [currentLocation, setCurrentLocation] = useState(null);
+  const [loading, setLoading] = useState(currentLocation ? true : false);
   const [watchId, setWatchId] = useState(null);
-  const [passwordRequired, setPasswordRequired] = useState(false);
+  const [passwordRequired, setPasswordRequired] = useState(true);
   const [password, setPassword] = useState('');
   const [timerStarted, setTimerStarted] = useState(false);
   const timerRef = useRef(null);
   const trackingIntervalRef = useRef(null);
 
+  // default password
   const CODE = '123';
 
+  // mobile number to send SMS
   const MOBILE_NO = '+916239165083';
 
   // location permission
@@ -40,6 +43,7 @@ const App = () => {
         },
       );
       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        setLoading(true);
         console.log('Location permission granted');
         startLocationTracking();
       } else {
@@ -129,6 +133,7 @@ const App = () => {
     if (password === CODE) {
       Alert.alert('Success', 'Password is correct. Happy journey!');
       clearTimeout(timerRef.current); // Clear the SOS timer
+      setPasswordRequired(false); // Reset password requirement
     } else {
       Alert.alert('Incorrect Password', 'Sending SOS alert...');
       sendSmsData(
@@ -137,6 +142,7 @@ const App = () => {
         currentLocation?.longitude,
       );
     }
+    setPassword(''); // Clear the password input after submission
   };
 
   const openMap = (lat, long) => {
@@ -173,25 +179,38 @@ const App = () => {
     };
   }, [watchId]);
 
+  // Start SOS timer
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setPasswordRequired(true); // Prompt user for password every 10 seconds
+    }, 10 * 1000);
+
+    return () => clearInterval(timer); // Cleanup on unmount
+  }, []);
+
   // return {currentLocation, requestAndroidLocationPermission};
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Women’s Safety App</Text>
-      <View style={styles.passwordContainer}>
-        <Text style={styles.prompt}>Enter Password:</Text>
-        <TextInput
-          style={styles.passwordInput}
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-          placeholder="Password"
-          placeholderTextColor="#aaa"
-        />
-        <TouchableOpacity style={styles.button} onPress={handlePasswordSubmit}>
-          <Text style={styles.buttonText}>Submit</Text>
-        </TouchableOpacity>
-      </View>
+      {passwordRequired && (
+        <View style={styles.passwordContainer}>
+          <Text style={styles.prompt}>Enter Password:</Text>
+          <TextInput
+            style={styles.passwordInput}
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Password"
+            placeholderTextColor="#aaa"
+          />
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handlePasswordSubmit}>
+            <Text style={styles.buttonText}>Submit</Text>
+          </TouchableOpacity>
+        </View>
+      )}
       <View style={styles.loc_box}>
         <Text style={styles.loc_text}>
           Lat : {currentLocation?.latitude || 'Loading'}, long :{' '}
@@ -203,6 +222,17 @@ const App = () => {
             openMap(currentLocation?.latitude, currentLocation?.longitude)
           }>
           <Text style={styles.mapButtonText}>View Your Current Location</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.sendSMSButton}
+          onPress={() =>
+            sendSmsData(
+              MOBILE_NO,
+              currentLocation?.latitude,
+              currentLocation?.longitude,
+            )
+          }>
+          <Text style={styles.sendSMSButtonText}>Send SMS Anyway</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -276,14 +306,29 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   mapButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#11ff00',
     padding: 10,
     borderRadius: 5,
     marginTop: 10,
   },
   mapButtonText: {
+    color: '#000000',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  sendSMSButton: {
+    backgroundColor: '#e40e0e',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 20,
+    textAlign: 'center',
+    color: '#fff',
+  },
+  sendSMSButtonText: {
     color: '#fff',
     fontSize: 16,
+    textAlign: 'center',
+    fontWeight: '900',
   },
 });
 
