@@ -1,167 +1,179 @@
-import React, {useState, useEffect, useCallback, useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {
+  PermissionsAndroid,
+  Alert,
   View,
   Text,
-  Button,
   TextInput,
-  StyleSheet,
-  Alert,
   TouchableOpacity,
-  PermissionsAndroid,
+  StyleSheet,
   Linking,
-  Platform,
 } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
-// import Communications from 'react-native-communications';
 import {SendDirectSms} from 'react-native-send-direct-sms';
 
-const emergencyPhoneNumber = 'tel:+918606740548';
-// const emergencyPhoneNumber = 'tel:7876699539';
-
-const HomeScreen = ({navigation}) => {
-  const [hasLocationPermission, setHasLocationPermission] = useState(false);
+const App = () => {
   const [currentLocation, setCurrentLocation] = useState(null);
+  const [watchId, setWatchId] = useState(null);
+  const [passwordRequired, setPasswordRequired] = useState(false);
   const [password, setPassword] = useState('');
   const [timerStarted, setTimerStarted] = useState(false);
   const timerRef = useRef(null);
+  const trackingIntervalRef = useRef(null);
 
-  // Request location permission for both Android and iOS
-  const requestLocationPermission = useCallback(async () => {
-    if (Platform.OS === 'android') {
-      console.log('Android');
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: 'Location Permission',
-            message: 'This app needs location access to send SOS alerts.',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          },
+  const CODE = '123';
+
+  const MOBILE_NO = '+916239165083';
+
+  // location permission
+  const requestAndroidLocationPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+          title: 'Location Permission',
+          message:
+            'This app needs access to your location to ensure safety tracking.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('Location permission granted');
+        startLocationTracking();
+      } else {
+        console.log('Location permission denied');
+        Alert.alert(
+          'Permission Denied',
+          'Location permission is required to track safety.',
         );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          console.log('Location permission granted for Android..!!');
-          setHasLocationPermission(true);
-        } else {
-          console.log('Location permission denied for Android');
-          Alert.alert(
-            'Permission Denied Android',
-            'Location permission is required to send SOS alerts.',
-          );
-        }
-      } catch (err) {
-        console.warn(err);
       }
-    } else {
-      console.log('IOS');
-      Geolocation.requestAuthorization('whenInUse').then(status => {
-        if (status === 'granted') {
-          console.log('Location permission granted for iOS');
-          setHasLocationPermission(true);
-        } else {
-          console.log('Location permission denied for iOS');
-          Alert.alert(
-            'Permission Denied IOS',
-            'Location permission is required to send SOS alerts.',
-          );
-        }
-      });
+    } catch (err) {
+      console.warn(err);
     }
-  }, []);
+  };
 
-  // Get current location
-  const getCurrentLocation = useCallback(() => {
-    // if (!hasLocationPermission) {
-    //   Alert.alert(
-    //     'Permission Denied GET',
-    //     'Location permission is required to send SOS alerts.',
-    //   );
-    //   return;
-    // }
+  // SMS Permission
+  const requestAndroidSMSPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.SEND_SMS,
+        {
+          title: 'SMS Permission',
+          message:
+            'This app needs access to your SMS to ensure safety tracking.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('SMS permission granted');
+        startLocationTracking();
+      } else {
+        console.log('SMS permission denied');
+        Alert.alert(
+          'Permission Denied',
+          'SMS permission is required to track safety.',
+        );
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
 
-    Geolocation.getCurrentPosition(
+  // Send SMS
+  function sendSmsData(mobileNumber, lat, long) {
+    SendDirectSms(
+      mobileNumber,
+      `This is an emergency message. Please help me. My location is: https://maps.google.com/?q=${lat},${long}`,
+    )
+      .then(res => console.log('then', res))
+      .catch(err => console.log('catch', err));
+  }
+
+  // Start location tracking
+  const startLocationTracking = () => {
+    console.log('Starting location tracking');
+    const id = Geolocation.getCurrentPosition(
       position => {
         const {latitude, longitude} = position.coords;
         setCurrentLocation({latitude, longitude});
-        console.log('Current location:', latitude, longitude);
+        console.log(latitude, longitude);
       },
       error => {
-        console.log('Location error:', error.message);
-        Alert.alert('Error', 'Failed to get your current location.');
-      },
-      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
-    );
-  }, [hasLocationPermission]);
-
-  // Open Google Maps with the current location
-  const openMaps = () => {
-    if (!currentLocation) {
-      Alert.alert(
-        'Location not available',
-        'Cannot open maps without location.',
-      );
-      return;
-    }
-    const {latitude, longitude} = currentLocation;
-    const url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
-    Linking.openURL(url);
-  };
-
-  // send sms
-  function sendSmsData(mobileNumber, bodySMS) {
-    SendDirectSms(mobileNumber, bodySMS)
-      .then(res => console.log('SMS sent successfully', res))
-      .catch(err => console.error('Error sending SMS', err));
-  }
-
-  // Handle SOS button press
-  const handleSOSPress = useCallback(async () => {
-    await requestLocationPermission();
-    getCurrentLocation();
-
-    sendSmsData('+918606740548', 'Hai');
-    if (currentLocation) {
-      const {latitude, longitude} = currentLocation;
-      const message = `SOS Alert! I'm at Latitude ${latitude}, Longitude ${longitude}`;
-      // Communications.textWithoutEncoding('+918606740548', message);
-      //   Linking.openURL(emergencyPhoneNumber); // Call the emergency number
-      Alert.alert('SOS Alert', 'Your SOS alert has been sent!', [{text: 'OK'}]);
-    }
-  }, [currentLocation, requestLocationPermission]);
-
-  // Timer for sending SOS if password is not entered
-  useEffect(() => {
-    if (timerStarted) {
-      const sosTimer = setTimeout(() => {
-        if (!password) {
-          Alert.alert('Timeout', 'No password entered. Sending SOS alert...');
-          handleSOSPress();
+        if (error.code === 3) {
+          // Timeout error
+          Geolocation.getCurrentPosition(
+            position => {
+              const {latitude, longitude} = position.coords;
+              setCurrentLocation({latitude, longitude});
+              console.log('Fallback:', latitude, longitude);
+            },
+            err => console.log('Fallback error:', err),
+            {enableHighAccuracy: false, timeout: 5000, maximumAge: 10000},
+          );
+        } else {
+          console.log(error);
         }
-      }, 30 * 1000); // 30 seconds timeout
-
-      timerRef.current = sosTimer;
-
-      return () => clearTimeout(sosTimer); // Clear timer on component unmount
-    }
-  }, [timerStarted, password, handleSOSPress]);
+      },
+      {enableHighAccuracy: true, timeout: 5000, maximumAge: 10000},
+    );
+    console.log(currentLocation);
+    setWatchId(id);
+  };
 
   // Handle password submission
   const handlePasswordSubmit = () => {
-    const correctPassword = '123'; // Replace with your actual password
-    if (password === correctPassword) {
+    if (password === CODE) {
       Alert.alert('Success', 'Password is correct. Happy journey!');
       clearTimeout(timerRef.current); // Clear the SOS timer
     } else {
       Alert.alert('Incorrect Password', 'Sending SOS alert...');
-      handleSOSPress();
+      sendSmsData(
+        MOBILE_NO,
+        currentLocation?.latitude,
+        currentLocation?.longitude,
+      );
     }
   };
 
-  // Start the timer when the component is mounted
+  const openMap = (lat, long) => {
+    const url = `https://maps.google.com/?q=${lat},${long}`;
+    Linking.openURL(url)
+      .then(() => {
+        console.log('Map opened');
+      })
+      .catch(err => {
+        console.error('Failed to open map:', err);
+      });
+  };
+
+  // Request permissions on component mount
   useEffect(() => {
-    setTimerStarted(true);
+    requestAndroidSMSPermission();
+    requestAndroidLocationPermission();
   }, []);
+
+  // Start tracking location
+  useEffect(() => {
+    setInterval(() => {
+      requestAndroidLocationPermission();
+    }, 10 * 1000);
+    return () => clearInterval(trackingIntervalRef.current);
+  }, []);
+
+  // Stop tracking when component unmounts
+  useEffect(() => {
+    return () => {
+      if (watchId !== null) {
+        Geolocation.clearWatch(watchId);
+      }
+    };
+  }, [watchId]);
+
+  // return {currentLocation, requestAndroidLocationPermission};
 
   return (
     <View style={styles.container}>
@@ -176,21 +188,26 @@ const HomeScreen = ({navigation}) => {
           placeholder="Password"
           placeholderTextColor="#aaa"
         />
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() =>
-            sendSmsData('+917876699539', 'Its an SOS..im in trouble')
-          }>
+        <TouchableOpacity style={styles.button} onPress={handlePasswordSubmit}>
           <Text style={styles.buttonText}>Submit</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.loc_box}>
+        <Text style={styles.loc_text}>
+          Lat : {currentLocation?.latitude || 'Loading'}, long :{' '}
+          {currentLocation?.longitude || 'Loading'}
+        </Text>
+        <TouchableOpacity
+          style={styles.mapButton}
+          onPress={() =>
+            openMap(currentLocation?.latitude, currentLocation?.longitude)
+          }>
+          <Text style={styles.mapButtonText}>View Your Current Location</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 };
-
-function App() {
-  return <HomeScreen />;
-}
 
 const styles = StyleSheet.create({
   container: {
@@ -240,6 +257,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  loc_box: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  loc_text: {
+    fontSize: 16,
+    color: '#333',
+  },
+  mapButton: {
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  mapButtonText: {
     color: '#fff',
     fontSize: 16,
   },
