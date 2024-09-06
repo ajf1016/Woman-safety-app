@@ -183,7 +183,7 @@ const App = () => {
   useEffect(() => {
     const timer = setInterval(() => {
       setPasswordRequired(true); // Prompt user for password every 10 seconds
-    }, 10 * 1000);
+    }, 10 * 1000); // increase the timer accordingly
 
     return () => clearInterval(timer); // Cleanup on unmount
   }, []);
@@ -193,6 +193,7 @@ const App = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Women’s Safety App</Text>
+      {/* if dont want to hide the input box , comnt this first line of condition and its end block : '{passwordRequired && (' and ')}' */}
       {passwordRequired && (
         <View style={styles.passwordContainer}>
           <Text style={styles.prompt}>Enter Password:</Text>
@@ -211,6 +212,7 @@ const App = () => {
           </TouchableOpacity>
         </View>
       )}
+
       <View style={styles.loc_box}>
         <Text style={styles.loc_text}>
           Lat : {currentLocation?.latitude || 'Loading'}, long :{' '}
