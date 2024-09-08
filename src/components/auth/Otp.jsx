@@ -1,11 +1,20 @@
-import React, { useState } from 'react';
-import { View, StatusBar, Image, TextInput, TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
-import { LinearGradient } from 'expo-linear-gradient';
+import React, {useState} from 'react';
+import {
+  View,
+  StatusBar,
+  Image,
+  TextInput,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  Alert,
+} from 'react-native';
+import Svg, {Path} from 'react-native-svg';
+import LinearGradient from 'react-native-linear-gradient';
 
 const CircularLogo = () => (
   <Image
-    source={require('./assets/logo.png')}
+    source={require('../../assets/images/logo.jpeg')}
     style={styles.logo}
   />
 );
@@ -32,7 +41,7 @@ const BottomWave = () => (
   </View>
 );
 
-const OTPVerification = () => {
+const Otp = () => {
   const [otp, setOtp] = useState('');
 
   const handleVerifyOTP = () => {
@@ -52,10 +61,9 @@ const OTPVerification = () => {
       <View style={styles.welcomeTextContainer}>
         <LinearGradient
           colors={['#FF9933', '#FFFFFF', '#138808']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.gradientTextContainer}
-        >
+          start={{x: 0, y: 0}}
+          end={{x: 1, y: 1}}
+          style={styles.gradientTextContainer}>
           <Text style={styles.welcomeText}>OTP Verification</Text>
         </LinearGradient>
       </View>
@@ -156,4 +164,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default OTPVerification;
+export default Otp;

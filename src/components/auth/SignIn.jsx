@@ -1,11 +1,21 @@
+// This is signin page for the user from here he will get otp
 import React from 'react';
-import { View, StatusBar, Image, TextInput, TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
-import { LinearGradient } from 'expo-linear-gradient';
+import {
+  View,
+  StatusBar,
+  Image,
+  TextInput,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  Alert,
+} from 'react-native';
+import Svg, {Path} from 'react-native-svg';
+import LinearGradient from 'react-native-linear-gradient';
 
 const CircularLogo = () => (
   <Image
-    source={require('./assets/logo.png')}
+    source={require('../../assets/images/logo.jpeg')}
     style={styles.logo}
   />
 );
@@ -14,11 +24,10 @@ const WelcomeText = () => (
   <View style={styles.welcomeTextContainer}>
     <LinearGradient
       colors={['#FF9933', '#FFFFFF', '#138808']}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={styles.gradientTextContainer}
-    >
-      <Text style={styles.welcomeText}>Welcome Onboard</Text>
+      start={{x: 0, y: 0}}
+      end={{x: 1, y: 1}}
+      style={styles.gradientTextContainer}>
+      <Text style={styles.welcomeText}>Sign In</Text>
     </LinearGradient>
   </View>
 );
@@ -45,26 +54,41 @@ const BottomWave = () => (
   </View>
 );
 
-const App = () => {
+const SignIn = () => {
+  const [name, setName] = React.useState('');
+  const [aadhaarNumber, setAadhaarNumber] = React.useState('');
   const [phoneNumber, setPhoneNumber] = React.useState('');
-  const [password, setPassword] = React.useState('');
 
-  const handleLogin = () => {
-    // Regular expression to validate a 10-digit phone number
-    const phoneNumberRegex = /^\d{10}$/;
+  const handleSignIn = () => {
+    const aadhaarRegex = /^\d{12}$/; // Aadhaar should be 12 digits
+    const phoneNumberRegex = /^\d{10}$/; // Phone number should be 10 digits
 
-    if (!phoneNumber || !password) {
-      Alert.alert('Validation Error', 'Please enter both phone number and password.');
+    if (!name || !aadhaarNumber || !phoneNumber) {
+      Alert.alert(
+        'Validation Error',
+        'Please enter Name, Aadhaar Number, and Phone Number.',
+      );
+      return;
+    }
+
+    if (!aadhaarRegex.test(aadhaarNumber)) {
+      Alert.alert(
+        'Validation Error',
+        'Aadhaar number must be exactly 12 digits.',
+      );
       return;
     }
 
     if (!phoneNumberRegex.test(phoneNumber)) {
-      Alert.alert('Validation Error', 'Phone number must be exactly 10 digits.');
+      Alert.alert(
+        'Validation Error',
+        'Phone number must be exactly 10 digits.',
+      );
       return;
     }
 
-    // Implement your login logic here
-    console.log('Login with:', phoneNumber, password);
+    // Implement your sign-in logic here
+    console.log('Sign In with:', name, aadhaarNumber, phoneNumber);
   };
 
   return (
@@ -72,27 +96,36 @@ const App = () => {
       <StatusBar barStyle="light-content" />
       <TopWave />
       <WelcomeText />
+      <Text style={styles.safeEastText}>SAFE EAST Instant</Text>
       <CircularLogo />
       <View style={styles.form}>
+        <TextInput
+          value={name}
+          onChangeText={setName}
+          placeholder="Name"
+          placeholderTextColor="#666"
+          style={styles.input}
+        />
+        <TextInput
+          value={aadhaarNumber}
+          onChangeText={setAadhaarNumber}
+          keyboardType="numeric"
+          maxLength={12} // Aadhaar Card number is 12 digits
+          placeholder="Aadhaar Card Number"
+          placeholderTextColor="#666"
+          style={styles.input}
+        />
         <TextInput
           value={phoneNumber}
           onChangeText={setPhoneNumber}
           keyboardType="phone-pad"
-          maxLength={10} // Limit the input to 10 digits
+          maxLength={10} // Phone number is 10 digits
           placeholder="Phone Number"
-          placeholderTextColor="#666" // Light gray color for the placeholder
+          placeholderTextColor="#666"
           style={styles.input}
         />
-        <TextInput
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          placeholder="Password"
-          placeholderTextColor="#666" // Light gray color for the placeholder
-          style={styles.input}
-        />
-        <TouchableOpacity onPress={handleLogin} style={styles.button}>
-          <Text style={styles.buttonText}>Login</Text>
+        <TouchableOpacity onPress={handleSignIn} style={styles.button}>
+          <Text style={styles.buttonText}>Get OTP For Verification </Text>
         </TouchableOpacity>
       </View>
       <BottomWave />
@@ -106,7 +139,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
-    overflow: 'hidden', // Ensures the wave doesn't overflow
+    overflow: 'hidden',
   },
   logo: {
     width: 100,
@@ -125,7 +158,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 15,
-    fontSize: 16, // Ensure text inside the input is visible and matches placeholder
+    fontSize: 16,
   },
   button: {
     backgroundColor: '#007bff',
@@ -136,6 +169,13 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 16,
+  },
+  safeEastText: {
+    marginTop: 20,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
   },
   topWaveContainer: {
     position: 'absolute',
@@ -162,7 +202,7 @@ const styles = StyleSheet.create({
   },
   welcomeTextContainer: {
     position: 'absolute',
-    top: 120, // Adjust this value to position text just above the logo
+    top: 120,
     alignItems: 'center',
   },
   gradientTextContainer: {
@@ -172,8 +212,8 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff', // Ensure the text is visible over the gradient
+    color: '#fff',
   },
 });
 
-export default App;
+export default SignIn;

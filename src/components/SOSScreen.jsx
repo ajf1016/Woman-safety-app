@@ -1,11 +1,17 @@
-// THis is the sos section which is use to sens the sos functionalities 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, Linking } from 'react-native';
-import * as Location from 'expo-location'; // Import Expo Location API
+import React, {useState, useEffect, useCallback, useRef} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+  Linking,
+} from 'react-native';
+import Geolocation from '@react-native-community/geolocation'; // Import Geolocation
 
 const emergencyPhoneNumber = 'tel:6239165083'; // Replace with actual emergency number
 
-// SOS Activation Screen
 const SOSScreen = () => {
   const [hasLocationPermission, setHasLocationPermission] = useState(false);
   const [password, setPassword] = useState('');
@@ -18,11 +24,7 @@ const SOSScreen = () => {
   // Request location permission
   const requestLocationPermission = useCallback(async () => {
     try {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Location permission is required to send SOS alerts.');
-        return;
-      }
+      Geolocation.requestAuthorization(); // Request authorization for location
       setHasLocationPermission(true);
     } catch (error) {
       Alert.alert('Error', 'Failed to request location permission');
@@ -30,19 +32,29 @@ const SOSScreen = () => {
   }, []);
 
   // Handle SOS Press: send location info and make a call
-  const handleSOSPress = useCallback(async () => {
-    await requestLocationPermission();
+  const handleSOSPress = useCallback(() => {
+    requestLocationPermission();
     if (hasLocationPermission) {
-      let location = await Location.getCurrentPositionAsync({});
-      const { latitude, longitude } = location.coords;
-      const message = `SOS Alert! I'm at Latitude ${latitude}, Longitude ${longitude}`;
+      Geolocation.getCurrentPosition(
+        position => {
+          const {latitude, longitude} = position.coords;
+          const message = `SOS Alert! I'm at Latitude ${latitude}, Longitude ${longitude}`;
 
-      // Automatically open the phone dialer with the emergency number
-      Linking.openURL(emergencyPhoneNumber);
+          // Automatically open the phone dialer with the emergency number
+          Linking.openURL(emergencyPhoneNumber);
 
-      Alert.alert('SOS Alert', 'Your SOS alert has been sent!', [{ text: 'OK' }]);
+          Alert.alert('SOS Alert', 'Your SOS alert has been sent!', [
+            {text: 'OK'},
+          ]);
+        },
+        error => Alert.alert('Error', 'Failed to get your location'),
+        {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000},
+      );
     } else {
-      Alert.alert('Permission Denied', 'Location permission is required to send SOS alerts.');
+      Alert.alert(
+        'Permission Denied',
+        'Location permission is required to send SOS alerts.',
+      );
     }
   }, [hasLocationPermission]);
 
@@ -51,34 +63,34 @@ const SOSScreen = () => {
     const correctPassword = '123'; // Replace with actual password
     if (password === correctPassword) {
       Alert.alert('Password Fine', 'You are safe!');
-      clearTimeout(timerRef.current); // Clear the current timer
-      clearTimeout(recheckTimerRef.current); // Clear recheck timer
-      clearTimeout(sosTimerRef.current); // Clear SOS timer
+      clearTimeout(timerRef.current);
+      clearTimeout(recheckTimerRef.current);
+      clearTimeout(sosTimerRef.current);
       setIsPasswordFine(true);
-      recheckPassword(); // Re-prompt for password after 5 seconds
+      recheckPassword();
     } else {
       Alert.alert('Incorrect Password', 'Sending SOS alert...');
       handleSOSPress();
     }
   };
 
-  // Recheck password every 5 seconds (you can change this interval)
   const recheckPassword = () => {
     recheckTimerRef.current = setTimeout(() => {
-      setIsPasswordFine(false); // Reset password fine status
-      Alert.alert('Re-enter Password', 'Please re-enter your password to confirm you are safe.');
-      startAutoSOSTimer(); // Start the 5-second timer for SOS
-    }, 5 * 1000); // Re-prompt after 5 seconds
+      setIsPasswordFine(false);
+      Alert.alert(
+        'Re-enter Password',
+        'Please re-enter your password to confirm you are safe.',
+      );
+      startAutoSOSTimer();
+    }, 5 * 1000);
   };
 
-  // Start travel and activate SOS
   const handleStartTravel = () => {
     setIsTravelStarted(true);
     setIsPasswordFine(false);
-    startAutoSOSTimer(); // Start 5-second auto-SOS timer if no password is entered
+    startAutoSOSTimer();
   };
 
-  // Stop travel and clear timers
   const handleStopTravel = () => {
     setIsTravelStarted(false);
     setIsPasswordFine(false);
@@ -87,7 +99,6 @@ const SOSScreen = () => {
     clearTimeout(sosTimerRef.current);
   };
 
-  // Clear the auto-SOS timer if password is entered within 5 seconds
   useEffect(() => {
     if (password) {
       clearTimeout(timerRef.current);
@@ -95,14 +106,13 @@ const SOSScreen = () => {
     }
   }, [password]);
 
-  // Start the 5-second timer for auto SOS if no password is entered
   const startAutoSOSTimer = () => {
     sosTimerRef.current = setTimeout(() => {
       if (!password) {
         Alert.alert('Timeout', 'No password entered. Sending SOS alert...');
         handleSOSPress();
       }
-    }, 5 * 1000); // Set to 5 seconds
+    }, 5 * 1000);
   };
 
   return (
@@ -111,7 +121,9 @@ const SOSScreen = () => {
 
       {/* Start/Stop Travel */}
       {!isTravelStarted ? (
-        <TouchableOpacity style={styles.startButton} onPress={handleStartTravel}>
+        <TouchableOpacity
+          style={styles.startButton}
+          onPress={handleStartTravel}>
           <Text style={styles.buttonText}>Start Travel</Text>
         </TouchableOpacity>
       ) : (
@@ -132,14 +144,20 @@ const SOSScreen = () => {
             placeholder="Password"
             placeholderTextColor="#aaa"
           />
-          <TouchableOpacity style={styles.submitButton} onPress={handlePasswordSubmit}>
+          <TouchableOpacity
+            style={styles.submitButton}
+            onPress={handlePasswordSubmit}>
             <Text style={styles.buttonText}>Submit</Text>
           </TouchableOpacity>
         </View>
       )}
 
       {/* "Password Fine" Message */}
-      {isPasswordFine && <Text style={styles.passwordFineText}>Password is fine. You are safe!</Text>}
+      {isPasswordFine && (
+        <Text style={styles.passwordFineText}>
+          Password is fine. You are safe!
+        </Text>
+      )}
 
       {/* SOS Button */}
       {isTravelStarted && (
@@ -193,7 +211,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#20232a', // Card background color to match theme
     borderRadius: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,

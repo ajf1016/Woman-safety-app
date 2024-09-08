@@ -10,6 +10,11 @@ import {
   Linking,
 } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
+import Login from './src/components/auth/Login';
+import SOSScreen from './src/components/SOSScreen';
+import Dashboard from './src/components/Dashboard';
+import Otp from './src/components/auth/Otp';
+import SignIn from './src/components/auth/SignIn';
 // import {NavigationContainer} from '@react-navigation/native';
 // import {createStackNavigator} from '@react-navigation/stack';
 
@@ -128,7 +133,12 @@ function App() {
     //     <Stack.Screen name="Home" component={HomeScreen} />
     //   </Stack.Navigator>
     // </NavigationContainer>
-    <HomeScreen />
+    // <HomeScreen/> />
+    // <Dashboard />
+    <SOSScreen />
+    // <Login />
+    // <SignIn />
+    // <Otp />
     // <AndroidLocPermission />
   );
 }

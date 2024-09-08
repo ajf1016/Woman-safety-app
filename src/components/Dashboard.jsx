@@ -1,50 +1,63 @@
-// This is the dashboar where the user will get the past record and all the details which she should know before travelling 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Dimensions } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
-import { AntDesign, FontAwesome } from '@expo/vector-icons';
+// This is the dashboar where the user will get the past record and all the details which she should know before travelling
+import React, {useState, useEffect, useCallback, useMemo} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  Dimensions,
+} from 'react-native';
+import {LineChart} from 'react-native-chart-kit';
+// import {AntDesign, FontAwesome} from '@expo/vector-icons';
 import axios from 'axios';
 
-const { width } = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 
-const SummaryCard = ({ title, value, icon, color }) => (
-  <View style={[styles.summaryCard, { borderColor: color }]}>
+const SummaryCard = ({title, value, color}) => (
+  <View style={[styles.summaryCard, {borderColor: color}]}>
     <View style={styles.cardContent}>
-      {icon}
+      {/* {icon} */}
+      <Text>Icon</Text>
       <View style={styles.cardText}>
         <Text style={styles.cardTitle}>{title}</Text>
-        <Text style={[styles.cardValue, { color }]}>{value}</Text>
+        <Text style={[styles.cardValue, {color}]}>{value}</Text>
       </View>
     </View>
   </View>
 );
 
-const AlertItem = ({ alert, onPress }) => (
+const AlertItem = ({alert, onPress}) => (
   <TouchableOpacity onPress={() => onPress(alert)} style={styles.alertItem}>
     <Text style={styles.alertText}>{alert.details}</Text>
   </TouchableOpacity>
 );
 
 const Dashboard = () => {
-  const [genderData, setGenderData] = useState({ men: 0, women: 0 });
+  const [genderData, setGenderData] = useState({men: 0, women: 0});
   const [alerts, setAlerts] = useState([]);
   const [trendData, setTrendData] = useState({
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-    datasets: [{ data: [10, 20, 15, 30, 25, 40] }] // Sample trend data
+    datasets: [{data: [10, 20, 15, 30, 25, 40]}], // Sample trend data
   });
 
   // Fetch gender data from API
   useEffect(() => {
     const fetchGenderData = async () => {
       try {
-        const response = await axios.get('https://randomuser.me/api/?results=100'); // Fetch 100 random users
+        const response = await axios.get(
+          'https://randomuser.me/api/?results=100',
+        ); // Fetch 100 random users
         const users = response.data.results;
 
         // Calculate gender distribution
         const menCount = users.filter(user => user.gender === 'male').length;
-        const womenCount = users.filter(user => user.gender === 'female').length;
+        const womenCount = users.filter(
+          user => user.gender === 'female',
+        ).length;
 
-        setGenderData({ men: menCount, women: womenCount });
+        setGenderData({men: menCount, women: womenCount});
       } catch (error) {
         console.error('Error fetching gender data:', error);
       }
@@ -53,14 +66,16 @@ const Dashboard = () => {
     fetchGenderData();
   }, []);
 
-  const handleAlertPress = useCallback((alert) => {
+  const handleAlertPress = useCallback(alert => {
     Alert.alert('Alert Details', alert.details);
   }, []);
 
   const filteredAlerts = useMemo(() => {
     return {
       loneWoman: alerts.filter(alert => alert.type === 'Lone Woman'),
-      surroundedWoman: alerts.filter(alert => alert.type === 'Surrounded Woman'),
+      surroundedWoman: alerts.filter(
+        alert => alert.type === 'Surrounded Woman',
+      ),
       sos: alerts.filter(alert => alert.type === 'SOS'),
     };
   }, [alerts]);
@@ -71,7 +86,8 @@ const Dashboard = () => {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Women Safety Analytics</Text>
         <TouchableOpacity style={styles.profileIcon}>
-          <FontAwesome name="user-circle" size={30} color="#fff" />
+          {/* <FontAwesome name="user-circle" size={30} color="#fff" /> */}
+          <Text>USER CIRCLE</Text>
         </TouchableOpacity>
       </View>
 
@@ -80,13 +96,13 @@ const Dashboard = () => {
         <SummaryCard
           title="Men"
           value={genderData.men}
-          icon={<AntDesign name="man" size={24} color="#FF9933" />}
+          // icon={<AntDesign name="man" size={24} color="#FF9933" />}
           color="#FF9933"
         />
         <SummaryCard
           title="Women"
           value={genderData.women}
-          icon={<AntDesign name="woman" size={24} color="#28A745" />}
+          // icon={<AntDesign name="woman" size={24} color="#28A745" />}
           color="#28A745"
         />
       </View>
@@ -115,7 +131,10 @@ const Dashboard = () => {
               <AlertItem key={index} alert={alert} onPress={handleAlertPress} />
             ))}
             {alerts.length > 5 && (
-              <TouchableOpacity onPress={() => Alert.alert('See More Alerts', 'You have more alerts.')}>
+              <TouchableOpacity
+                onPress={() =>
+                  Alert.alert('See More Alerts', 'You have more alerts.')
+                }>
                 <Text style={styles.seeMore}>See More</Text>
               </TouchableOpacity>
             )}
@@ -172,7 +191,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     marginHorizontal: 5,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 3,
@@ -199,7 +218,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     borderRadius: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 3,
@@ -225,7 +244,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 2,
