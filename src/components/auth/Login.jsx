@@ -1,191 +1,148 @@
-import React from 'react';
+import {useNavigation} from '@react-navigation/native';
+import React, {useState} from 'react';
 import {
-  View,
-  StatusBar,
-  Image,
-  TextInput,
-  TouchableOpacity,
-  Text,
-  StyleSheet,
   Alert,
+  Button,
+  Image,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  View,
 } from 'react-native';
-import Svg, {Path} from 'react-native-svg';
-import LinearGradient from 'react-native-linear-gradient'; // Use the new LinearGradient
 
-const CircularLogo = () => (
-  <Image
-    source={require('../../assets/images/logo.jpeg')}
-    style={styles.logo}
-  />
-);
-
-const WelcomeText = () => (
-  <View style={styles.welcomeTextContainer}>
-    <LinearGradient
-      colors={['#FF9933', '#FFFFFF', '#138808']}
-      start={{x: 0, y: 0}}
-      end={{x: 1, y: 1}}
-      style={styles.gradientTextContainer}>
-      <Text style={styles.welcomeText}>Welcome Onboard</Text>
-    </LinearGradient>
-  </View>
-);
-
-const TopWave = () => (
-  <View style={styles.topWaveContainer}>
-    <Svg width="150" height="80" viewBox="0 0 150 80" style={styles.wave}>
-      <Path
-        d="M0,30 C30,10 60,20 90,30 C120,40 150,20 150,30 L150,0 L0,0 Z"
-        fill="#FF9933"
-      />
-    </Svg>
-  </View>
-);
-
-const BottomWave = () => (
-  <View style={styles.bottomWaveContainer}>
-    <Svg width="150" height="80" viewBox="0 0 150 80" style={styles.wave}>
-      <Path
-        d="M0,50 C30,70 60,60 90,50 C120,40 150,60 150,50 L150,80 L0,80 Z"
-        fill="#28A745"
-      />
-    </Svg>
-  </View>
-);
-
-const Login = () => {
-  const [phoneNumber, setPhoneNumber] = React.useState('');
-  const [password, setPassword] = React.useState('');
-
-  const handleLogin = () => {
-    const phoneNumberRegex = /^\d{10}$/;
-
-    if (!phoneNumber || !password) {
-      Alert.alert(
-        'Validation Error',
-        'Please enter both phone number and password.',
-      );
-      return;
-    }
-
-    if (!phoneNumberRegex.test(phoneNumber)) {
-      Alert.alert(
-        'Validation Error',
-        'Phone number must be exactly 10 digits.',
-      );
-      return;
-    }
-
-    console.log('Login with:', phoneNumber, password);
-  };
+export default function LoginForm() {
+  let navigation = useNavigation();
+  const [click, setClick] = useState(false);
+  const {username, setUsername} = useState('');
+  const {password, setPassword} = useState('');
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
-      <TopWave />
-      <WelcomeText />
-      <CircularLogo />
-      <View style={styles.form}>
+    <SafeAreaView style={styles.container}>
+      <Image
+        source={require('../../assets/images/logo.png')}
+        style={styles.image}
+        resizeMode="contain"
+      />
+      <Text style={styles.title}>Login</Text>
+      <View style={styles.inputView}>
         <TextInput
-          value={phoneNumber}
-          onChangeText={setPhoneNumber}
-          keyboardType="phone-pad"
-          maxLength={10} // Limit the input to 10 digits
-          placeholder="Phone Number"
-          placeholderTextColor="#666" // Light gray color for the placeholder
           style={styles.input}
+          placeholder="Enter your Email or Password"
+          value={username}
+          onChangeText={setUsername}
+          autoCorrect={false}
+          autoCapitalize="none"
+          placeholderTextColor={'#770092'}
         />
         <TextInput
+          style={styles.input}
+          placeholder="Enter your password"
+          secureTextEntry
           value={password}
           onChangeText={setPassword}
-          secureTextEntry
-          placeholder="Password"
-          placeholderTextColor="#666" // Light gray color for the placeholder
-          style={styles.input}
+          autoCorrect={false}
+          autoCapitalize="none"
+          placeholderTextColor={'#770092'}
         />
-        <TouchableOpacity onPress={handleLogin} style={styles.button}>
-          <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
       </View>
-      <BottomWave />
-    </View>
+      <View style={styles.rememberView}>
+        <Pressable onPress={() => Alert.alert('Forget Password!')}>
+          <Text style={styles.forgetText}>Login with OTP</Text>
+        </Pressable>
+        <View>
+          <Pressable onPress={() => Alert.alert('Forget Password!')}>
+            <Text style={styles.forgetText}>Forgot Password?</Text>
+          </Pressable>
+        </View>
+      </View>
+
+      <View style={styles.buttonView}>
+        <Pressable
+          style={styles.button}
+          onPress={() => Alert.alert('Login Successfuly!')}>
+          <Text style={styles.buttonText}>LOGIN</Text>
+        </Pressable>
+      </View>
+      <Text
+        style={styles.footerText}
+        onPress={() => navigation.navigate('Signup')}>
+        Don't Have Account?<Text style={styles.signup}> Sign Up</Text>
+      </Text>
+    </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    overflow: 'hidden', // Ensures the wave doesn't overflow
+    paddingTop: 70,
   },
-  logo: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    overflow: 'hidden',
-    marginBottom: 20,
+  image: {
+    height: 160,
+    width: 170,
   },
-  form: {
-    width: '80%',
+  title: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    paddingVertical: 40,
+    color: '#770092',
+  },
+  inputView: {
+    gap: 15,
+    width: '100%',
+    paddingHorizontal: 40,
+    marginBottom: 5,
   },
   input: {
     height: 50,
-    borderColor: '#ccc',
+    paddingHorizontal: 20,
+    borderColor: '#770092',
     borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 15,
-    fontSize: 16, // Ensure text inside the input is visible and matches placeholder
+    borderRadius: 7,
+    color: '#770092',
+  },
+  rememberView: {
+    width: '100%',
+    paddingHorizontal: 50,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  forgetText: {
+    fontSize: 13,
+    color: '#770092',
   },
   button: {
-    backgroundColor: '#007bff',
-    padding: 15,
+    backgroundColor: '#770092',
+    height: 45,
+    borderColor: 'gray',
+    borderWidth: 1,
     borderRadius: 5,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  topWaveContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: 150,
-    height: 80,
-    overflow: 'hidden',
-    backgroundColor: 'transparent',
-  },
-  bottomWaveContainer: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    width: 150,
-    height: 80,
-    overflow: 'hidden',
-    backgroundColor: 'transparent',
-  },
-  wave: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-  },
-  welcomeTextContainer: {
-    position: 'absolute',
-    top: 120, // Adjust this value to position text just above the logo
-    alignItems: 'center',
-  },
-  gradientTextContainer: {
-    padding: 10,
-    borderRadius: 5,
-  },
-  welcomeText: {
-    fontSize: 20,
+    color: 'white',
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#fff', // Ensure the text is visible over the gradient
+  },
+  buttonView: {
+    width: '100%',
+    paddingHorizontal: 50,
+    marginTop: 30,
+  },
+  footerText: {
+    textAlign: 'center',
+    color: 'gray',
+    marginTop: 10,
+  },
+  signup: {
+    color: '#770092',
+    fontSize: 13,
   },
 });
-
-export default Login;
