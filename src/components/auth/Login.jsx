@@ -2,12 +2,10 @@ import {useNavigation} from '@react-navigation/native';
 import React, {useState} from 'react';
 import {
   Alert,
-  Button,
   Image,
   Pressable,
   SafeAreaView,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   View,
@@ -79,10 +77,11 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     paddingTop: 70,
+    backgroundColor: '#f4f4f4',
   },
   image: {
-    height: 160,
-    width: 170,
+    height: 200,
+    width: 200,
   },
   title: {
     fontSize: 30,
@@ -94,12 +93,12 @@ const styles = StyleSheet.create({
   inputView: {
     gap: 15,
     width: '100%',
-    paddingHorizontal: 40,
+    paddingHorizontal: 20,
     marginBottom: 5,
   },
   input: {
     height: 50,
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
     borderColor: '#770092',
     borderWidth: 1,
     borderRadius: 7,
@@ -107,7 +106,7 @@ const styles = StyleSheet.create({
   },
   rememberView: {
     width: '100%',
-    paddingHorizontal: 50,
+    paddingHorizontal: 20,
     justifyContent: 'space-between',
     alignItems: 'center',
     flexDirection: 'row',
@@ -116,6 +115,7 @@ const styles = StyleSheet.create({
   forgetText: {
     fontSize: 13,
     color: '#770092',
+    fontWeight: 'bold',
   },
   button: {
     backgroundColor: '#770092',
@@ -144,5 +144,6 @@ const styles = StyleSheet.create({
   signup: {
     color: '#770092',
     fontSize: 13,
+    fontWeight: 'bold',
   },
 });

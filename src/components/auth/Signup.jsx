@@ -229,17 +229,16 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     justifyContent: 'center',
-    // padding: 20,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#f4f4f4',
   },
   inputView: {
     width: '100%',
-    paddingHorizontal: 40,
+    paddingHorizontal: 20,
     marginBottom: 10,
   },
   input: {
     height: 50,
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
     borderColor: '#770092',
     borderWidth: 1,
     borderRadius: 7,
@@ -275,7 +274,7 @@ const styles = StyleSheet.create({
   },
   buttonView: {
     width: '100%',
-    paddingHorizontal: 40,
+    paddingHorizontal: 20,
     marginTop: 10,
   },
   footerText: {
@@ -286,6 +285,7 @@ const styles = StyleSheet.create({
   signup: {
     color: '#770092',
     fontSize: 13,
+    fontWeight: 'bold',
   },
 });
 

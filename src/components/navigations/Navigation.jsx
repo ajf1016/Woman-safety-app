@@ -87,7 +87,7 @@ export default function Navigation() {
 
   return (
     <NavigationContainer>
-      <StatusBar backgroundColor="#fff" barStyle={'dark-content'} />
+      <StatusBar backgroundColor="#f4f4f4" barStyle={'dark-content'} />
       {rednerScreen()}
     </NavigationContainer>
   );
