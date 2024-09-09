@@ -15,6 +15,7 @@ import SOSScreen from './src/components/SOSScreen';
 import Dashboard from './src/components/Dashboard';
 import Otp from './src/components/auth/Otp';
 import SignIn from './src/components/auth/SignIn';
+import ActiveListener from './src/components/ActiveListener';
 // import {NavigationContainer} from '@react-navigation/native';
 // import {createStackNavigator} from '@react-navigation/stack';
 
@@ -135,7 +136,8 @@ function App() {
     // </NavigationContainer>
     // <HomeScreen/> />
     // <Dashboard />
-    <SOSScreen />
+    // <SOSScreen />
+    <ActiveListener />
     // <Login />
     // <SignIn />
     // <Otp />
