@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native';
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {
   Alert,
   Image,
@@ -8,14 +8,38 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
+import {UserContext} from '../context/stores/Userstore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {COLORS} from '../../constants/theme';
 
 export default function LoginForm() {
   let navigation = useNavigation();
-  const [click, setClick] = useState(false);
+  const {userDispatch, userState} = useContext(UserContext);
+
   const {username, setUsername} = useState('');
   const {password, setPassword} = useState('');
+
+  const handleLogin = async () => {
+    console.log('Login');
+    let user_data = {
+      ...userState.user,
+      is_verified: true,
+    };
+    await AsyncStorage.setItem('user', JSON.stringify(user_data)).then(
+      result => {
+        userDispatch({
+          type: 'UPDATE_USER',
+          user: {
+            user: true,
+            ...user_data,
+          },
+        });
+      },
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -24,16 +48,16 @@ export default function LoginForm() {
         style={styles.image}
         resizeMode="contain"
       />
-      <Text style={styles.title}>Login</Text>
+      <Text style={styles.title}>Login your account</Text>
       <View style={styles.inputView}>
         <TextInput
           style={styles.input}
-          placeholder="Enter your Email or Password"
+          placeholder="Enter your Email or Phone"
           value={username}
           onChangeText={setUsername}
           autoCorrect={false}
           autoCapitalize="none"
-          placeholderTextColor={'#770092'}
+          placeholderTextColor={COLORS.green}
         />
         <TextInput
           style={styles.input}
@@ -43,7 +67,7 @@ export default function LoginForm() {
           onChangeText={setPassword}
           autoCorrect={false}
           autoCapitalize="none"
-          placeholderTextColor={'#770092'}
+          placeholderTextColor={COLORS.green}
         />
       </View>
       <View style={styles.rememberView}>
@@ -58,11 +82,12 @@ export default function LoginForm() {
       </View>
 
       <View style={styles.buttonView}>
-        <Pressable
+        <TouchableOpacity
+          activeOpacity={0.8}
           style={styles.button}
-          onPress={() => Alert.alert('Login Successfuly!')}>
-          <Text style={styles.buttonText}>LOGIN</Text>
-        </Pressable>
+          onPress={handleLogin}>
+          <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
       </View>
       <Text
         style={styles.footerText}
@@ -77,7 +102,7 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     paddingTop: 70,
-    backgroundColor: '#f4f4f4',
+    backgroundColor: COLORS.background,
   },
   image: {
     height: 200,
@@ -88,7 +113,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     paddingVertical: 40,
-    color: '#770092',
+    color: COLORS.green,
   },
   inputView: {
     gap: 15,
@@ -99,10 +124,10 @@ const styles = StyleSheet.create({
   input: {
     height: 50,
     paddingHorizontal: 15,
-    borderColor: '#770092',
+    borderColor: COLORS.green,
     borderWidth: 1,
     borderRadius: 7,
-    color: '#770092',
+    color: COLORS.green,
   },
   rememberView: {
     width: '100%',
@@ -114,14 +139,12 @@ const styles = StyleSheet.create({
   },
   forgetText: {
     fontSize: 13,
-    color: '#770092',
+    color: COLORS.green,
     fontWeight: 'bold',
   },
   button: {
-    backgroundColor: '#770092',
+    backgroundColor: COLORS.green,
     height: 45,
-    borderColor: 'gray',
-    borderWidth: 1,
     borderRadius: 5,
     alignItems: 'center',
     justifyContent: 'center',
@@ -142,7 +165,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   signup: {
-    color: '#770092',
+    color: COLORS.green,
     fontSize: 13,
     fontWeight: 'bold',
   },

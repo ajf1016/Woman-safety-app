@@ -1,20 +1,11 @@
 import React from 'react';
-import {View, Text, Button} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {View, TouchableOpacity, StyleSheet} from 'react-native';
 
-const Dashboard = ({navigation}) => {
-  const handleLogout = async () => {
-    // Remove access token from AsyncStorage
-    await AsyncStorage.removeItem('accessToken');
-    navigation.navigate('Welcome');
-  };
+import {Text} from 'react-native-svg';
 
-  return (
-    <View>
-      <Text>Welcome to the Dashboard!</Text>
-      <Button title="Logout" onPress={handleLogout} />
-    </View>
-  );
+// Main App Stack Navigator
+const DashBoard = () => {
+  return <Text>Hello</Text>;
 };
 
-export default Dashboard;
+export default DashBoard;

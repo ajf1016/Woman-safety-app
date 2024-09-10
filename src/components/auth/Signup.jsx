@@ -1,25 +1,26 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {
   View,
   Text,
   TextInput,
-  Button,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Pressable,
+  Alert,
 } from 'react-native';
+import {UserContext} from '../context/stores/Userstore';
+import {COLORS} from '../../constants/theme';
 
 const SignupScreen = ({navigation}) => {
+  const {userDispatch} = useContext(UserContext);
+  const [isLoading, setIsLoading] = useState(false);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [phone, setPhone] = useState('');
-  const [gender, setGender] = useState('');
-  const [locality, setLocality] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
+  const [pin, setPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
 
   const [errors, setErrors] = useState({});
 
@@ -48,28 +49,13 @@ const SignupScreen = ({navigation}) => {
       valid = false;
     }
 
+    if (pin !== confirmPin) {
+      newErrors.confirmPin = 'Emergency Pins do not match';
+      valid = false;
+    }
+
     if (!phone || phone.length < 10) {
       newErrors.phone = 'Valid phone number is required';
-      valid = false;
-    }
-
-    if (!gender) {
-      newErrors.gender = 'Gender is required';
-      valid = false;
-    }
-
-    if (!locality) {
-      newErrors.locality = 'Locality is required';
-      valid = false;
-    }
-
-    if (!city) {
-      newErrors.city = 'City is required';
-      valid = false;
-    }
-
-    if (!state) {
-      newErrors.state = 'State is required';
       valid = false;
     }
 
@@ -77,10 +63,67 @@ const SignupScreen = ({navigation}) => {
     return valid;
   };
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     if (validateForm()) {
-      // Handle signup logic
-      console.log('Signup successful');
+      setIsLoading(true);
+      // Prepare the payload
+      const userData = {
+        username,
+        email,
+        password,
+        confirmPassword,
+        phone,
+        pin,
+        confirmPin,
+      };
+
+      try {
+        const response = await fetch(
+          'http://127.0.0.1:8001/api/v1/user_auth/create_user/',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData),
+          },
+        );
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Handle successful response
+          console.log('Signup successful', data);
+          const userData = result.user;
+
+          // Update the user state globally
+          userDispatch({
+            type: 'UPDATE_USER',
+            user: {
+              username: userData.username,
+              email: userData.email,
+              phone: userData.phone,
+              city: userData.city,
+              gender: userData.gender,
+              locality: userData.locality,
+              state: userData.state,
+              is_verified: true, // Assuming successful signup means user is verified
+            },
+          });
+          Alert.alert('Signup successful');
+        } else {
+          // Handle server errors or validation failures
+          console.log('Signup failed', data);
+          Alert.alert('Signup failed');
+          // Optionally show server-side validation errors
+          setErrors(data.errors || {});
+        }
+      } catch (error) {
+        console.error('Error during signup:', error);
+        Alert.alert('Error during signup');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -91,12 +134,12 @@ const SignupScreen = ({navigation}) => {
       <View style={styles.inputView}>
         <TextInput
           style={styles.input}
-          placeholder="Enter your Username"
+          placeholder="Enter your Full Name"
           value={username}
           onChangeText={setUsername}
           autoCorrect={false}
           autoCapitalize="none"
-          placeholderTextColor={'#770092'}
+          placeholderTextColor={COLORS.green}
         />
         {errors.username && (
           <Text style={styles.errorText}>{errors.username}</Text>
@@ -113,7 +156,7 @@ const SignupScreen = ({navigation}) => {
           autoCorrect={false}
           autoCapitalize="none"
           keyboardType="email-address"
-          placeholderTextColor={'#770092'}
+          placeholderTextColor={COLORS.green}
         />
         {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
       </View>
@@ -126,7 +169,7 @@ const SignupScreen = ({navigation}) => {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
-          placeholderTextColor={'#770092'}
+          placeholderTextColor={COLORS.green}
         />
         {errors.password && (
           <Text style={styles.errorText}>{errors.password}</Text>
@@ -141,7 +184,7 @@ const SignupScreen = ({navigation}) => {
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
-          placeholderTextColor={'#770092'}
+          placeholderTextColor={COLORS.green}
         />
         {errors.confirmPassword && (
           <Text style={styles.errorText}>{errors.confirmPassword}</Text>
@@ -156,7 +199,7 @@ const SignupScreen = ({navigation}) => {
           value={phone}
           onChangeText={setPhone}
           keyboardType="phone-pad"
-          placeholderTextColor={'#770092'}
+          placeholderTextColor={COLORS.green}
         />
         {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
       </View>
@@ -165,56 +208,43 @@ const SignupScreen = ({navigation}) => {
       <View style={styles.inputView}>
         <TextInput
           style={styles.input}
-          placeholder="Enter your Gender"
-          value={gender}
-          onChangeText={setGender}
-          placeholderTextColor={'#770092'}
+          placeholder="Set 4 digit Pin (for emergency situations)"
+          value={pin}
+          secureTextEntry
+          onChangeText={setPin}
+          placeholderTextColor={COLORS.green}
         />
-        {errors.gender && <Text style={styles.errorText}>{errors.gender}</Text>}
+        {errors.pin && <Text style={styles.errorText}>{errors.pin}</Text>}
       </View>
 
-      {/* Locality Input */}
+      {/* Gender Input */}
       <View style={styles.inputView}>
         <TextInput
           style={styles.input}
-          placeholder="Enter your Locality"
-          value={locality}
-          onChangeText={setLocality}
-          placeholderTextColor={'#770092'}
+          placeholder="Confirm your 4 digit Pin"
+          value={confirmPin}
+          secureTextEntry
+          onChangeText={setConfirmPin}
+          placeholderTextColor={COLORS.green}
         />
-        {errors.locality && (
-          <Text style={styles.errorText}>{errors.locality}</Text>
+        {errors.confirmPin && (
+          <Text style={styles.errorText}>{errors.confirmPin}</Text>
         )}
       </View>
 
-      {/* City Input */}
-      <View style={styles.inputView}>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your City"
-          value={city}
-          onChangeText={setCity}
-          placeholderTextColor={'#770092'}
-        />
-        {errors.city && <Text style={styles.errorText}>{errors.city}</Text>}
-      </View>
-
-      {/* State Input */}
-      <View style={styles.inputView}>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your State"
-          value={state}
-          onChangeText={setState}
-          placeholderTextColor={'#770092'}
-        />
-        {errors.state && <Text style={styles.errorText}>{errors.state}</Text>}
-      </View>
-
       <View style={styles.buttonView}>
-        <Pressable style={styles.button}>
-          <Text style={styles.buttonText}>Create Account</Text>
-        </Pressable>
+        {!isLoading ? (
+          <TouchableOpacity
+            activeOpacity={0.8}
+            style={styles.button}
+            onPress={handleSignup}>
+            <Text style={styles.buttonText}>Create Account</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity activeOpacity={0.8} style={styles.button}>
+            <Text style={styles.buttonText}>Loading...</Text>
+          </TouchableOpacity>
+        )}
       </View>
       <Text
         style={styles.footerText}
@@ -229,7 +259,7 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     justifyContent: 'center',
-    backgroundColor: '#f4f4f4',
+    backgroundColor: COLORS.background,
   },
   inputView: {
     width: '100%',
@@ -239,10 +269,10 @@ const styles = StyleSheet.create({
   input: {
     height: 50,
     paddingHorizontal: 15,
-    borderColor: '#770092',
+    borderColor: COLORS.green,
     borderWidth: 1,
     borderRadius: 7,
-    color: '#770092',
+    color: COLORS.green,
   },
   errorText: {
     color: 'red',
@@ -253,15 +283,13 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 10,
-    color: '#770092',
+    marginBottom: 30,
+    color: COLORS.green,
   },
 
   button: {
-    backgroundColor: '#770092',
+    backgroundColor: COLORS.green,
     height: 45,
-    borderColor: 'gray',
-    borderWidth: 1,
     borderRadius: 5,
     alignItems: 'center',
     justifyContent: 'center',
@@ -283,7 +311,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   signup: {
-    color: '#770092',
+    color: COLORS.green,
     fontSize: 13,
     fontWeight: 'bold',
   },

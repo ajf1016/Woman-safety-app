@@ -1,24 +1,26 @@
 import React, {useContext, useEffect, useState} from 'react';
-
-// libs
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {StatusBar, ActivityIndicator, View} from 'react-native';
 
-// components
-import {StatusBar} from 'react-native';
+// Screens
 import Dashboard from '../Dashboard';
 import Signup from '../auth/Signup';
 import Login from '../auth/Login';
 import Welcome from '../auth/Welcome';
+
+// User Context
 import {UserContext} from '../context/stores/Userstore';
+import TabNavigation from './TabNavigation';
+import {COLORS} from '../../constants/theme';
 
 const Stack = createNativeStackNavigator();
 
 const AuthScreen = () => (
   <Stack.Navigator
     screenOptions={{headerShown: false}}
-    initialRouteName={'Signup'}>
-    {/* <Stack.Screen name="Welcome" component={Welcome} /> */}
+    initialRouteName="Login">
     <Stack.Screen name="Signup" component={Signup} />
     <Stack.Screen name="Login" component={Login} />
   </Stack.Navigator>
@@ -27,68 +29,75 @@ const AuthScreen = () => (
 const MainScreen = () => (
   <Stack.Navigator
     screenOptions={{headerShown: false}}
-    initialRouteName="Dashboard">
-    {/* <Stack.Screen name="TabNavigator" component={TabNavigator} /> */}
+    initialRouteName="TabNavigation">
+    <Stack.Screen name="TabNavigation" component={TabNavigation} />
     <Stack.Screen name="Dashboard" component={Dashboard} />
   </Stack.Navigator>
 );
 
 export default function Navigation() {
   const {userState, userDispatch} = useContext(UserContext);
-  const [isWelcome, setIsWelcome] = useState(true);
+  const [loading, setLoading] = useState(true); // Add a loading state
 
   const checkUserLogIn = async () => {
-    const is_slider_done = await AsyncStorage.getItem('is_slider_done');
-    const user = await AsyncStorage.getItem('user');
-    // AsyncStorage.removeItem('user');
-    if (is_slider_done) {
-      if (user) {
-        userDispatch({
-          type: 'UPDATE_USER',
-          user: {
-            is_slider_done: true,
-            user: true,
-          },
-        });
+    try {
+      let user_data = await AsyncStorage.getItem('user');
+
+      // Check if user_data exists and is valid
+      if (user_data) {
+        user_data = JSON.parse(user_data); // Safely parse the data
+
+        console.log('>>', user_data.is_verified);
+
+        // Check if is_verified exists and compare it correctly
+        if (
+          user_data.is_verified === true ||
+          user_data.is_verified === 'true'
+        ) {
+          userDispatch({
+            type: 'UPDATE_USER',
+            user: {is_verified: true},
+          });
+        } else {
+          userDispatch({
+            type: 'UPDATE_USER',
+            user: {is_verified: false},
+          });
+        }
       } else {
+        console.log('No user data found.');
+        // Optionally, handle cases where user_data is null
         userDispatch({
           type: 'UPDATE_USER',
-          user: {
-            is_slider_done: true,
-            user: false,
-          },
+          user: {is_verified: false},
         });
       }
-    } else {
-      userDispatch({
-        type: 'UPDATE_USER',
-        user: {
-          is_slider_done: false,
-          user: false,
-        },
-      });
+    } catch (error) {
+      console.error('Error checking login status:', error);
+    } finally {
+      setLoading(false); // Set loading to false after check
     }
   };
 
-  const rednerScreen = () => {
-    if (userState.is_verified) {
-      return <MainScreen />;
-    } else {
-      return <AuthScreen />;
-    }
-  };
+  console.log('NAV', userState.is_verified);
 
   useEffect(() => {
     checkUserLogIn();
-    setTimeout(() => {
-      setIsWelcome(false);
-    }, 1500);
   }, []);
+
+  // Loading indicator while checking auth state
+  if (loading) {
+    return (
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <ActivityIndicator size="large" color="#770092" />
+      </View>
+    );
+  }
 
   return (
     <NavigationContainer>
-      <StatusBar backgroundColor="#f4f4f4" barStyle={'dark-content'} />
-      {rednerScreen()}
+      <StatusBar backgroundColor={COLORS.background} barStyle="dark-content" />
+      {userState.is_verified ? <MainScreen /> : <AuthScreen />}
     </NavigationContainer>
   );
 }

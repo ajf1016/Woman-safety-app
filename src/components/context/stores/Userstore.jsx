@@ -8,7 +8,6 @@ const initialState = {
   email: '',
   image: '',
   address: null,
-  user: false,
   is_verified: false,
   active_address: false,
   access_token: null,
