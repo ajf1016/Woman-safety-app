@@ -3,6 +3,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {StatusBar, ActivityIndicator, View} from 'react-native';
+import {
+  SafeAreaInsetsContext,
+  SafeAreaView,
+} from 'react-native-safe-area-context';
 
 // Screens
 import Dashboard from '../Dashboard';
@@ -89,7 +93,7 @@ export default function Navigation() {
   if (loading) {
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <ActivityIndicator size="large" color="#770092" />
+        <ActivityIndicator size="large" color={COLORS.green} />
       </View>
     );
   }

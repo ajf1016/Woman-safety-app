@@ -10,7 +10,7 @@ export const COLORS = {
   primary: '#191919',
   secondary: '#EAB600',
   icon: '#BCC8D4',
-  background: '#f5f5f5',
+  background: '#ffffff',
   place_holder: '#252525',
   green: '#009262',
   red: '#E02B1D',
